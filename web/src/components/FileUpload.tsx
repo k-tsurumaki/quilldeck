@@ -43,7 +43,18 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
         if (fileInput) fileInput.value = '';
       }
     } catch (err) {
-      setError('アップロードに失敗しました');
+      console.error('Upload error:', err);
+      if (err instanceof Error) {
+        if (err.message.includes('Failed to fetch')) {
+          setError('サーバーに接続できません。しばらくお待ちください。');
+        } else if (err.message.includes('HTTP error')) {
+          setError('アップロードに失敗しました。サーバーエラーが発生しました。');
+        } else {
+          setError('アップロードに失敗しました。ネットワークエラーが発生しました。');
+        }
+      } else {
+        setError('アップロードに失敗しました。');
+      }
     } finally {
       setUploading(false);
     }

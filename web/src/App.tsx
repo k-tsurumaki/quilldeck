@@ -23,7 +23,14 @@ function App() {
       const result = await api.health();
       setBackendStatus(`Backend Status: ${result.status}`);
     } catch (error) {
-      setBackendStatus('Backend connection failed');
+      console.error('Health check failed:', error);
+      if (error instanceof Error && error.message.includes('Failed to fetch')) {
+        setBackendStatus('サーバーに接続中...');
+        // 5秒後に再試行
+        setTimeout(checkBackendHealth, 5000);
+      } else {
+        setBackendStatus('Backend connection failed');
+      }
     }
   };
 

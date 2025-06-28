@@ -29,7 +29,18 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
         onSuccess(result.user_id);
       }
     } catch (err) {
-      setError('Network error occurred');
+      console.error('Auth error:', err);
+      if (err instanceof Error) {
+        if (err.message.includes('Failed to fetch')) {
+          setError('サーバーに接続できません。しばらくお待ちください。');
+        } else if (err.message.includes('HTTP error')) {
+          setError('サーバーエラーが発生しました。');
+        } else {
+          setError('ネットワークエラーが発生しました。');
+        }
+      } else {
+        setError('不明なエラーが発生しました。');
+      }
     } finally {
       setLoading(false);
     }
