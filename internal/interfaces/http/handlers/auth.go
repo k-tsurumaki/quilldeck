@@ -36,6 +36,11 @@ type AuthResponse struct {
 }
 
 func (h *AuthHandler) Register(c *fuselage.Context) error {
+	// CORSヘッダーを設定
+	c.Response.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	c.Response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	
 	var req RegisterRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid JSON"})
@@ -53,6 +58,11 @@ func (h *AuthHandler) Register(c *fuselage.Context) error {
 }
 
 func (h *AuthHandler) Login(c *fuselage.Context) error {
+	// CORSヘッダーを設定
+	c.Response.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	c.Response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	
 	var req LoginRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid JSON"})

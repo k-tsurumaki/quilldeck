@@ -26,17 +26,22 @@ QuillDeckは、ドキュメントのアップロードと要約生成を行うWe
 
 ### 起動方法
 
-1. **バックエンドのみ起動**
-```bash
-docker compose up -d backend
-```
-
-2. **全サービス起動**
+1. **全サービス起動**
 ```bash
 docker compose up -d
 ```
 
-3. **動作確認**
+2. **アクセス**
+- フロントエンド: http://localhost:3000
+- バックエンドAPI: http://localhost:8080
+
+3. **使用方法**
+- ブラウザで http://localhost:3000 にアクセス
+- ユーザー登録またはログイン
+- TXTまたはMDファイルをアップロード
+- 要約を生成
+
+4. **APIテスト（オプション）**
 ```bash
 # ヘルスチェック
 curl http://localhost:8080/health
@@ -49,11 +54,6 @@ curl -X POST -H "Content-Type: application/json" \
 # ファイルアップロード
 curl -X POST -F "file=@your_file.txt" \
   http://localhost:8080/api/documents/upload
-
-# 要約生成
-curl -X POST -H "Content-Type: application/json" \
-  -d '{"document_id":"YOUR_DOCUMENT_ID","length":"short"}' \
-  http://localhost:8080/api/documents/summary
 ```
 
 ## 📁 プロジェクト構造
@@ -125,13 +125,24 @@ npm run dev
 - [x] ユーザー認証（登録・ログイン）
 - [x] ファイルアップロード（TXT/MD対応）
 - [x] 要約生成（サンプル実装：一文目抽出）
+- [x] CORS対応
 - [x] Docker環境構築
 - [x] データベースマイグレーション
+
+### フロントエンド
+- [x] React + TypeScript + Vite環境
+- [x] 認証フォーム（登録・ログイン切り替え）
+- [x] ファイルアップロード機能
+- [x] 要約生成インターフェース
+- [x] レスポンシブデザイン
+- [x] エラーハンドリング
+- [x] ローディング状態管理
 
 ### インフラ
 - [x] Docker Compose設定
 - [x] マルチステージビルド
 - [x] SQLite永続化
+- [x] フロントエンド・バックエンド連携
 
 ## 📝 TODO（今後の実装予定）
 
@@ -146,10 +157,10 @@ npm run dev
   - セッション管理
   - パスワードハッシュ化
 
-- [ ] **フロントエンド実装**
-  - ユーザーインターフェース
-  - ファイルアップロード画面
-  - 要約結果表示
+- [ ] **UI/UXの改善**
+  - ダークモード対応
+  - ファイルドラッグ&ドロップ
+  - プログレスバー表示
 
 ### 中優先度
 - [ ] **ファイル処理の拡張**
@@ -157,15 +168,16 @@ npm run dev
   - Word文書対応
   - ファイルサイズ制限設定
 
+- [ ] **データ管理機能**
+  - ドキュメント一覧表示
+  - 要約履歴管理
+  - ファイル削除機能
+  - 検索機能
+
 - [ ] **データベース拡張**
   - PostgreSQL対応
   - データベース接続プール
   - マイグレーション管理
-
-- [ ] **API機能拡張**
-  - ドキュメント一覧取得
-  - 要約履歴管理
-  - ファイル削除機能
 
 ### 低優先度
 - [ ] **運用・監視**
@@ -187,20 +199,28 @@ npm run dev
 
 ### よくある問題
 
+**フロントエンドが表示されない**
+```bash
+# サービス状態確認
+docker compose ps
+# フロントエンドログ確認
+docker compose logs frontend
+```
+
+**Backend connection failed エラー**
+```bash
+# バックエンド状態確認
+curl http://localhost:8080/health
+# サービス再起動
+docker compose restart backend
+```
+
 **ポート8080が使用中**
 ```bash
 # 使用中のプロセスを確認
 lsof -i :8080
 # プロセスを停止
 kill <PID>
-```
-
-**データベース接続エラー**
-```bash
-# データディレクトリの権限確認
-ls -la data/
-# 権限修正
-chmod 755 data/
 ```
 
 **Docker ビルドエラー**

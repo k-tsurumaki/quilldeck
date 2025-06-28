@@ -37,6 +37,11 @@ type SummaryResponse struct {
 }
 
 func (h *DocumentHandler) Upload(c *fuselage.Context) error {
+	// CORSヘッダーを設定
+	c.Response.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	c.Response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	
 	// TODO: 実際の認証実装後にユーザーIDを取得
 	userID := uuid.New()
 
@@ -81,6 +86,11 @@ func (h *DocumentHandler) Upload(c *fuselage.Context) error {
 }
 
 func (h *DocumentHandler) GenerateSummary(c *fuselage.Context) error {
+	// CORSヘッダーを設定
+	c.Response.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	c.Response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	
 	var req SummaryRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid JSON"})
