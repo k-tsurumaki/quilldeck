@@ -1,0 +1,557 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>models: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github/k-tsurumaki/quilldeck/internal/domain/models/document.go (100.0%)</option>
+				
+				<option value="file1">github/k-tsurumaki/quilldeck/internal/domain/models/summary.go (100.0%)</option>
+				
+				<option value="file2">github/k-tsurumaki/quilldeck/internal/domain/models/user.go (100.0%)</option>
+				
+				<option value="file3">github/k-tsurumaki/quilldeck/internal/domain/service/auth.go (79.2%)</option>
+				
+				<option value="file4">github/k-tsurumaki/quilldeck/internal/domain/service/document.go (0.0%)</option>
+				
+				<option value="file5">github/k-tsurumaki/quilldeck/internal/pkg/errors/errors.go (100.0%)</option>
+				
+				<option value="file6">github/k-tsurumaki/quilldeck/tests/unit/domain/service/mocks/user_repository.go (42.9%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package models
+
+import (
+        "time"
+
+        "github.com/google/uuid"
+)
+
+type DocumentType string
+
+const (
+        DocumentTypeTXT DocumentType = "txt"
+        DocumentTypeMD  DocumentType = "md"
+)
+
+type Document struct {
+        ID          uuid.UUID    `json:"id"`
+        UserID      uuid.UUID    `json:"user_id"`
+        Title       string       `json:"title"`
+        Content     string       `json:"content"`
+        Type        DocumentType `json:"type"`
+        Size        int64        `json:"size"`
+        UploadedAt  time.Time    `json:"uploaded_at"`
+        ProcessedAt *time.Time   `json:"processed_at,omitempty"`
+}
+
+func NewDocument(userID uuid.UUID, title, content string, docType DocumentType, size int64) *Document <span class="cov8" title="1">{
+        return &amp;Document{
+                ID:         uuid.New(),
+                UserID:     userID,
+                Title:      title,
+                Content:    content,
+                Type:       docType,
+                Size:       size,
+                UploadedAt: time.Now(),
+        }
+}</span>
+
+func (d *Document) Validate() error <span class="cov8" title="1">{
+        if d.UserID == uuid.Nil </span><span class="cov8" title="1">{
+                return &amp;ValidationError{Field: "user_id", Message: "user_id is required"}
+        }</span>
+        <span class="cov8" title="1">if d.Title == "" </span><span class="cov8" title="1">{
+                return &amp;ValidationError{Field: "title", Message: "title is required"}
+        }</span>
+        <span class="cov8" title="1">if d.Content == "" </span><span class="cov8" title="1">{
+                return &amp;ValidationError{Field: "content", Message: "content is required"}
+        }</span>
+        <span class="cov8" title="1">if d.Type != DocumentTypeTXT &amp;&amp; d.Type != DocumentTypeMD </span><span class="cov8" title="1">{
+                return &amp;ValidationError{Field: "type", Message: "invalid document type"}
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (d *Document) MarkProcessed() <span class="cov8" title="1">{
+        now := time.Now()
+        d.ProcessedAt = &amp;now
+}</span>
+
+func (d *Document) IsProcessed() bool <span class="cov8" title="1">{
+        return d.ProcessedAt != nil
+}</pre>
+		
+		<pre class="file" id="file1" style="display: none">package models
+
+import (
+        "time"
+
+        "github.com/google/uuid"
+)
+
+type SummaryLength string
+
+const (
+        SummaryLengthShort  SummaryLength = "short"
+        SummaryLengthMedium SummaryLength = "medium"
+        SummaryLengthLong   SummaryLength = "long"
+)
+
+type Summary struct {
+        ID         uuid.UUID     `json:"id"`
+        DocumentID uuid.UUID     `json:"document_id"`
+        Content    string        `json:"content"`
+        Length     SummaryLength `json:"length"`
+        Keywords   []string      `json:"keywords"`
+        CreatedAt  time.Time     `json:"created_at"`
+        UpdatedAt  time.Time     `json:"updated_at"`
+}
+
+func NewSummary(documentID uuid.UUID, content string, length SummaryLength, keywords []string) *Summary <span class="cov8" title="1">{
+        return &amp;Summary{
+                ID:         uuid.New(),
+                DocumentID: documentID,
+                Content:    content,
+                Length:     length,
+                Keywords:   keywords,
+                CreatedAt:  time.Now(),
+                UpdatedAt:  time.Now(),
+        }
+}</span>
+
+func (s *Summary) Validate() error <span class="cov8" title="1">{
+        if s.DocumentID == uuid.Nil </span><span class="cov8" title="1">{
+                return &amp;ValidationError{Field: "document_id", Message: "document_id is required"}
+        }</span>
+        <span class="cov8" title="1">if s.Content == "" </span><span class="cov8" title="1">{
+                return &amp;ValidationError{Field: "content", Message: "content is required"}
+        }</span>
+        <span class="cov8" title="1">if s.Length != SummaryLengthShort &amp;&amp; s.Length != SummaryLengthMedium &amp;&amp; s.Length != SummaryLengthLong </span><span class="cov8" title="1">{
+                return &amp;ValidationError{Field: "length", Message: "invalid summary length"}
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (s *Summary) UpdateContent(content string) <span class="cov8" title="1">{
+        s.Content = content
+        s.UpdatedAt = time.Now()
+}</pre>
+		
+		<pre class="file" id="file2" style="display: none">package models
+
+import (
+        "time"
+
+        "github.com/google/uuid"
+)
+
+type User struct {
+        ID        uuid.UUID `json:"id"`
+        Email     string    `json:"email"`
+        Password  string    `json:"-"`
+        Name      string    `json:"name"`
+        CreatedAt time.Time `json:"created_at"`
+        UpdatedAt time.Time `json:"updated_at"`
+}
+
+func NewUser(email, password, name string) *User <span class="cov8" title="1">{
+        return &amp;User{
+                ID:        uuid.New(),
+                Email:     email,
+                Password:  password,
+                Name:      name,
+                CreatedAt: time.Now(),
+                UpdatedAt: time.Now(),
+        }
+}</span>
+
+func (u *User) Validate() error <span class="cov8" title="1">{
+        if u.Email == "" </span><span class="cov8" title="1">{
+                return &amp;ValidationError{Field: "email", Message: "email is required"}
+        }</span>
+        <span class="cov8" title="1">if u.Password == "" </span><span class="cov8" title="1">{
+                return &amp;ValidationError{Field: "password", Message: "password is required"}
+        }</span>
+        <span class="cov8" title="1">if u.Name == "" </span><span class="cov8" title="1">{
+                return &amp;ValidationError{Field: "name", Message: "name is required"}
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+type ValidationError struct {
+        Field   string
+        Message string
+}
+
+func (e *ValidationError) Error() string <span class="cov8" title="1">{
+        return e.Message
+}</pre>
+		
+		<pre class="file" id="file3" style="display: none">package service
+
+import (
+        "context"
+        "crypto/sha256"
+        "fmt"
+
+        "github/k-tsurumaki/quilldeck/internal/domain/models"
+        "github/k-tsurumaki/quilldeck/internal/domain/repository"
+        "github/k-tsurumaki/quilldeck/internal/pkg/errors"
+        "github.com/google/uuid"
+)
+
+type AuthService struct {
+        userRepo repository.UserRepository
+}
+
+func NewAuthService(userRepo repository.UserRepository) *AuthService <span class="cov8" title="1">{
+        return &amp;AuthService{userRepo: userRepo}
+}</span>
+
+func (s *AuthService) Register(ctx context.Context, email, password, name string) (*models.User, error) <span class="cov8" title="1">{
+        existingUser, err := s.userRepo.GetByEmail(ctx, email)
+        if err == nil &amp;&amp; existingUser != nil </span><span class="cov8" title="1">{
+                return nil, errors.New(errors.ErrCodeValidation, "email already exists")
+        }</span>
+
+        <span class="cov8" title="1">hashedPassword := s.hashPassword(password)
+        user := models.NewUser(email, hashedPassword, name)
+
+        if err := user.Validate(); err != nil </span><span class="cov8" title="1">{
+                return nil, errors.Wrap(err, errors.ErrCodeValidation, "invalid user data")
+        }</span>
+
+        <span class="cov8" title="1">if err := s.userRepo.Create(ctx, user); err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Wrap(err, errors.ErrCodeInternal, "failed to create user")
+        }</span>
+
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+func (s *AuthService) Login(ctx context.Context, email, password string) (*models.User, error) <span class="cov8" title="1">{
+        user, err := s.userRepo.GetByEmail(ctx, email)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, errors.New(errors.ErrCodeUnauthorized, "invalid credentials")
+        }</span>
+
+        <span class="cov8" title="1">hashedPassword := s.hashPassword(password)
+        if user.Password != hashedPassword </span><span class="cov8" title="1">{
+                return nil, errors.New(errors.ErrCodeUnauthorized, "invalid credentials")
+        }</span>
+
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+func (s *AuthService) GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error) <span class="cov0" title="0">{
+        user, err := s.userRepo.GetByID(ctx, userID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Wrap(err, errors.ErrCodeNotFound, "user not found")
+        }</span>
+        <span class="cov0" title="0">return user, nil</span>
+}
+
+func (s *AuthService) hashPassword(password string) string <span class="cov8" title="1">{
+        hash := sha256.Sum256([]byte(password))
+        return fmt.Sprintf("%x", hash)
+}</pre>
+		
+		<pre class="file" id="file4" style="display: none">package service
+
+import (
+        "context"
+        "strings"
+
+        "github/k-tsurumaki/quilldeck/internal/domain/models"
+        "github/k-tsurumaki/quilldeck/internal/domain/repository"
+        "github/k-tsurumaki/quilldeck/internal/pkg/errors"
+        "github.com/google/uuid"
+)
+
+type DocumentService struct {
+        docRepo     repository.DocumentRepository
+        summaryRepo repository.SummaryRepository
+}
+
+func NewDocumentService(docRepo repository.DocumentRepository, summaryRepo repository.SummaryRepository) *DocumentService <span class="cov0" title="0">{
+        return &amp;DocumentService{
+                docRepo:     docRepo,
+                summaryRepo: summaryRepo,
+        }
+}</span>
+
+func (s *DocumentService) UploadDocument(ctx context.Context, userID uuid.UUID, title, content string, docType models.DocumentType) (*models.Document, error) <span class="cov0" title="0">{
+        document := models.NewDocument(userID, title, content, docType, int64(len(content)))
+
+        if err := document.Validate(); err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Wrap(err, errors.ErrCodeValidation, "invalid document data")
+        }</span>
+
+        <span class="cov0" title="0">if err := s.docRepo.Create(ctx, document); err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Wrap(err, errors.ErrCodeInternal, "failed to create document")
+        }</span>
+
+        <span class="cov0" title="0">return document, nil</span>
+}
+
+func (s *DocumentService) GetDocument(ctx context.Context, documentID uuid.UUID) (*models.Document, error) <span class="cov0" title="0">{
+        document, err := s.docRepo.GetByID(ctx, documentID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Wrap(err, errors.ErrCodeNotFound, "document not found")
+        }</span>
+        <span class="cov0" title="0">return document, nil</span>
+}
+
+func (s *DocumentService) GetUserDocuments(ctx context.Context, userID uuid.UUID) ([]*models.Document, error) <span class="cov0" title="0">{
+        documents, err := s.docRepo.GetByUserID(ctx, userID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Wrap(err, errors.ErrCodeInternal, "failed to get user documents")
+        }</span>
+        <span class="cov0" title="0">return documents, nil</span>
+}
+
+func (s *DocumentService) GenerateSummary(ctx context.Context, documentID uuid.UUID, length models.SummaryLength) (*models.Summary, error) <span class="cov0" title="0">{
+        document, err := s.docRepo.GetByID(ctx, documentID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Wrap(err, errors.ErrCodeNotFound, "document not found")
+        }</span>
+
+        // 簡単な要約生成（実際のAI連携は後で実装）
+        <span class="cov0" title="0">summaryContent := s.generateSimpleSummary(document.Content, length)
+        keywords := s.extractKeywords(document.Content)
+
+        summary := models.NewSummary(documentID, summaryContent, length, keywords)
+
+        if err := summary.Validate(); err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Wrap(err, errors.ErrCodeValidation, "invalid summary data")
+        }</span>
+
+        <span class="cov0" title="0">if err := s.summaryRepo.Create(ctx, summary); err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Wrap(err, errors.ErrCodeInternal, "failed to create summary")
+        }</span>
+
+        // ドキュメントを処理済みとしてマーク
+        <span class="cov0" title="0">document.MarkProcessed()
+        if err := s.docRepo.Update(ctx, document); err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Wrap(err, errors.ErrCodeInternal, "failed to update document")
+        }</span>
+
+        <span class="cov0" title="0">return summary, nil</span>
+}
+
+func (s *DocumentService) generateSimpleSummary(content string, length models.SummaryLength) string <span class="cov0" title="0">{
+        sentences := strings.Split(content, ".")
+        var maxSentences int
+
+        switch length </span>{
+        case models.SummaryLengthShort:<span class="cov0" title="0">
+                maxSentences = 2</span>
+        case models.SummaryLengthMedium:<span class="cov0" title="0">
+                maxSentences = 5</span>
+        case models.SummaryLengthLong:<span class="cov0" title="0">
+                maxSentences = 10</span>
+        default:<span class="cov0" title="0">
+                maxSentences = 5</span>
+        }
+
+        <span class="cov0" title="0">if len(sentences) &lt;= maxSentences </span><span class="cov0" title="0">{
+                return content
+        }</span>
+
+        <span class="cov0" title="0">return strings.Join(sentences[:maxSentences], ".") + "."</span>
+}
+
+func (s *DocumentService) extractKeywords(content string) []string <span class="cov0" title="0">{
+        words := strings.Fields(strings.ToLower(content))
+        keywordMap := make(map[string]int)
+
+        for _, word := range words </span><span class="cov0" title="0">{
+                if len(word) &gt; 3 </span><span class="cov0" title="0">{
+                        keywordMap[word]++
+                }</span>
+        }
+
+        <span class="cov0" title="0">var keywords []string
+        for word, count := range keywordMap </span><span class="cov0" title="0">{
+                if count &gt; 1 </span><span class="cov0" title="0">{
+                        keywords = append(keywords, word)
+                }</span>
+        }
+
+        <span class="cov0" title="0">if len(keywords) &gt; 5 </span><span class="cov0" title="0">{
+                keywords = keywords[:5]
+        }</span>
+
+        <span class="cov0" title="0">return keywords</span>
+}</pre>
+		
+		<pre class="file" id="file5" style="display: none">package errors
+
+import "fmt"
+
+type AppError struct {
+        Code    string
+        Message string
+        Err     error
+}
+
+func (e *AppError) Error() string <span class="cov8" title="1">{
+        if e.Err != nil </span><span class="cov8" title="1">{
+                return fmt.Sprintf("%s: %s (%v)", e.Code, e.Message, e.Err)
+        }</span>
+        <span class="cov8" title="1">return fmt.Sprintf("%s: %s", e.Code, e.Message)</span>
+}
+
+func New(code, message string) *AppError <span class="cov8" title="1">{
+        return &amp;AppError{Code: code, Message: message}
+}</span>
+
+func Wrap(err error, code, message string) *AppError <span class="cov8" title="1">{
+        return &amp;AppError{Code: code, Message: message, Err: err}
+}</span>
+
+// 共通エラーコード
+const (
+        ErrCodeValidation   = "VALIDATION_ERROR"
+        ErrCodeNotFound     = "NOT_FOUND"
+        ErrCodeUnauthorized = "UNAUTHORIZED"
+        ErrCodeInternal     = "INTERNAL_ERROR"
+)</pre>
+		
+		<pre class="file" id="file6" style="display: none">package mocks
+
+import (
+        "context"
+
+        "github/k-tsurumaki/quilldeck/internal/domain/models"
+        "github.com/google/uuid"
+        "github.com/stretchr/testify/mock"
+)
+
+type MockUserRepository struct {
+        mock.Mock
+}
+
+func (m *MockUserRepository) Create(ctx context.Context, user *models.User) error <span class="cov8" title="1">{
+        args := m.Called(ctx, user)
+        return args.Error(0)
+}</span>
+
+func (m *MockUserRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.User, error) <span class="cov0" title="0">{
+        args := m.Called(ctx, id)
+        if args.Get(0) == nil </span><span class="cov0" title="0">{
+                return nil, args.Error(1)
+        }</span>
+        <span class="cov0" title="0">return args.Get(0).(*models.User), args.Error(1)</span>
+}
+
+func (m *MockUserRepository) GetByEmail(ctx context.Context, email string) (*models.User, error) <span class="cov8" title="1">{
+        args := m.Called(ctx, email)
+        if args.Get(0) == nil </span><span class="cov8" title="1">{
+                return nil, args.Error(1)
+        }</span>
+        <span class="cov8" title="1">return args.Get(0).(*models.User), args.Error(1)</span>
+}
+
+func (m *MockUserRepository) Update(ctx context.Context, user *models.User) error <span class="cov0" title="0">{
+        args := m.Called(ctx, user)
+        return args.Error(0)
+}</span>
+
+func (m *MockUserRepository) Delete(ctx context.Context, id uuid.UUID) error <span class="cov0" title="0">{
+        args := m.Called(ctx, id)
+        return args.Error(0)
+}</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
