@@ -82,25 +82,34 @@ func (s *DocumentService) GenerateSummary(ctx context.Context, documentID uuid.U
 }
 
 func (s *DocumentService) generateSimpleSummary(content string, length models.SummaryLength) string {
-	sentences := strings.Split(content, ".")
-	var maxSentences int
-
-	switch length {
-	case models.SummaryLengthShort:
-		maxSentences = 2
-	case models.SummaryLengthMedium:
-		maxSentences = 5
-	case models.SummaryLengthLong:
-		maxSentences = 10
-	default:
-		maxSentences = 5
+	// TODO: AI連携による実際の要約生成を実装
+	// 現在は入力の一文目を返すサンプル実装
+	content = strings.TrimSpace(content)
+	
+	// 日本語の句点で分割
+	if strings.Contains(content, "。") {
+		sentences := strings.Split(content, "。")
+		if len(sentences) > 0 && strings.TrimSpace(sentences[0]) != "" {
+			return strings.TrimSpace(sentences[0]) + "。"
+		}
 	}
-
-	if len(sentences) <= maxSentences {
-		return content
+	
+	// 英語のピリオドで分割（改行を除去してから処理）
+	if strings.Contains(content, ".") {
+		cleanContent := strings.ReplaceAll(content, "\n", " ")
+		sentences := strings.Split(cleanContent, ".")
+		if len(sentences) > 0 && strings.TrimSpace(sentences[0]) != "" {
+			return strings.TrimSpace(sentences[0]) + "."
+		}
 	}
-
-	return strings.Join(sentences[:maxSentences], ".") + "."
+	
+	// 改行で分割して最初の行を返す
+	lines := strings.Split(content, "\n")
+	if len(lines) > 0 && strings.TrimSpace(lines[0]) != "" {
+		return strings.TrimSpace(lines[0])
+	}
+	
+	return "No content to summarize."
 }
 
 func (s *DocumentService) extractKeywords(content string) []string {

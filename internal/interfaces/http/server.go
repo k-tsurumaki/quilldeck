@@ -12,6 +12,7 @@ import (
 type Server struct {
 	router      *fuselage.Router
 	authHandler *handlers.AuthHandler
+	docHandler  *handlers.DocumentHandler
 }
 
 func NewServer(db *sqlite.DB) *Server {
@@ -29,6 +30,7 @@ func NewServer(db *sqlite.DB) *Server {
 	return &Server{
 		router:      router,
 		authHandler: handlers.NewAuthHandler(authService, docService),
+		docHandler:  handlers.NewDocumentHandler(docService),
 	}
 }
 
@@ -39,6 +41,10 @@ func (s *Server) Start(port string) error {
 	// 認証エンドポイント
 	s.router.POST("/api/auth/register", s.authHandler.Register)
 	s.router.POST("/api/auth/login", s.authHandler.Login)
+	
+	// ドキュメントエンドポイント
+	s.router.POST("/api/documents/upload", s.docHandler.Upload)
+	s.router.POST("/api/documents/summary", s.docHandler.GenerateSummary)
 
 	server := fuselage.NewServer(":"+port, s.router)
 	return server.ListenAndServe()
