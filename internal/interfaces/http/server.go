@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/k-tsurumaki/fuselage"
+	"github/k-tsurumaki/quilldeck/internal/domain/service"
+	"github/k-tsurumaki/quilldeck/internal/infrastructure/database/sqlite"
 	"github/k-tsurumaki/quilldeck/internal/interfaces/http/handlers"
 )
 
@@ -12,12 +14,21 @@ type Server struct {
 	authHandler *handlers.AuthHandler
 }
 
-func NewServer() *Server {
+func NewServer(db *sqlite.DB) *Server {
 	router := fuselage.New()
+	
+	// リポジトリ作成
+	userRepo := sqlite.NewUserRepository(db)
+	docRepo := sqlite.NewDocumentRepository(db)
+	summaryRepo := sqlite.NewSummaryRepository(db)
+	
+	// サービス作成
+	authService := service.NewAuthService(userRepo)
+	docService := service.NewDocumentService(docRepo, summaryRepo)
 	
 	return &Server{
 		router:      router,
-		authHandler: handlers.NewAuthHandler(),
+		authHandler: handlers.NewAuthHandler(authService, docService),
 	}
 }
 

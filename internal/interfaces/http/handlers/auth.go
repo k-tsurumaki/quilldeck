@@ -4,12 +4,19 @@ import (
 	"net/http"
 
 	"github.com/k-tsurumaki/fuselage"
+	"github/k-tsurumaki/quilldeck/internal/domain/service"
 )
 
-type AuthHandler struct{}
+type AuthHandler struct {
+	authService *service.AuthService
+	docService  *service.DocumentService
+}
 
-func NewAuthHandler() *AuthHandler {
-	return &AuthHandler{}
+func NewAuthHandler(authService *service.AuthService, docService *service.DocumentService) *AuthHandler {
+	return &AuthHandler{
+		authService: authService,
+		docService:  docService,
+	}
 }
 
 type RegisterRequest struct {
@@ -34,9 +41,14 @@ func (h *AuthHandler) Register(c *fuselage.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid JSON"})
 	}
 
+	user, err := h.authService.Register(c.Request.Context(), req.Email, req.Password, req.Name)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
 	return c.JSON(http.StatusOK, AuthResponse{
-		Message: "Registration endpoint working",
-		UserID:  "test-user-id",
+		Message: "User registered successfully",
+		UserID:  user.ID.String(),
 	})
 }
 
@@ -46,8 +58,13 @@ func (h *AuthHandler) Login(c *fuselage.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid JSON"})
 	}
 
+	user, err := h.authService.Login(c.Request.Context(), req.Email, req.Password)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
+	}
+
 	return c.JSON(http.StatusOK, AuthResponse{
-		Message: "Login endpoint working",
-		UserID:  "test-user-id",
+		Message: "Login successful",
+		UserID:  user.ID.String(),
 	})
 }
