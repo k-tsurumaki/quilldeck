@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github/k-tsurumaki/quilldeck/internal/domain/models"
@@ -118,16 +117,13 @@ func (s *DocumentService) GenerateSummary(ctx context.Context, documentID uuid.U
 	// 要約生成（LLM APIが設定されていない場合はシンプル要約を使用）
 	var summaryContent string
 	if s.llmClinet.apiKey != "" && s.llmClinet.baseURL != "" {
-		var err error
-		summaryContent, err = s.getSummaryFromLLM(ctx, document.Content)
-		if err != nil {
-			// LLM APIエラーの場合はシンプル要約にフォールバック
-			summaryContent = s.generateSimpleSummary(document.Content)
-		}
-	} else {
-		// LLM APIが設定されていない場合はシンプル要約を使用
-		summaryContent = s.generateSimpleSummary(document.Content)
-	}		
+		errors.Wrap(err, errors.ErrCodeInternal, "LLM API is not configured")
+	}
+	summaryContent, err = s.getSummaryFromLLM(ctx, document.Content)
+	if err != nil {
+		return nil, errors.Wrap(err, errors.ErrCodeInternal, "failed to get summary from LLM")
+	}
+
 	summary := models.NewSummary(documentID, summaryContent)
 
 	if err := summary.Validate(); err != nil {
@@ -200,35 +196,4 @@ func (s *DocumentService) getSummaryFromLLM(ctx context.Context, content string)
 	}
 
 	return llmResponse.Choices[0].Message.Content, nil
-}
-
-func (s *DocumentService) generateSimpleSummary(content string) string {
-	// TODO: AI連携による実際の要約生成を実装
-	// 現在は入力の一文目を返すサンプル実装
-	content = strings.TrimSpace(content)
-
-	// 日本語の句点で分割
-	if strings.Contains(content, "。") {
-		sentences := strings.Split(content, "。")
-		if len(sentences) > 0 && strings.TrimSpace(sentences[0]) != "" {
-			return strings.TrimSpace(sentences[0]) + "。"
-		}
-	}
-
-	// 英語のピリオドで分割（改行を除去してから処理）
-	if strings.Contains(content, ".") {
-		cleanContent := strings.ReplaceAll(content, "\n", " ")
-		sentences := strings.Split(cleanContent, ".")
-		if len(sentences) > 0 && strings.TrimSpace(sentences[0]) != "" {
-			return strings.TrimSpace(sentences[0]) + "."
-		}
-	}
-
-	// 改行で分割して最初の行を返す
-	lines := strings.Split(content, "\n")
-	if len(lines) > 0 && strings.TrimSpace(lines[0]) != "" {
-		return strings.TrimSpace(lines[0])
-	}
-
-	return "No content to summarize."
 }

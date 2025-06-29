@@ -37,7 +37,7 @@ func Load() *Config {
 		LLM: LLMConfig{
 			LLM_API_KEY:  getEnv("LLM_API_KEY", ""),
 			LLM_BASE_URL: getEnv("LLM_BASE_URL", ""),
-			LLM_MODEL: getEnv("LLM_BASE_URL", ""),
+			LLM_MODEL: getEnv("LLM_MODEL", ""),
 		},
 	}
 }
