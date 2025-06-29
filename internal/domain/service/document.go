@@ -114,12 +114,8 @@ func (s *DocumentService) GenerateSummary(ctx context.Context, documentID uuid.U
 		return nil, errors.Wrap(err, errors.ErrCodeNotFound, "document not found")
 	}
 
-	// 要約生成（LLM APIが設定されていない場合はシンプル要約を使用）
-	var summaryContent string
-	if s.llmClinet.apiKey != "" && s.llmClinet.baseURL != "" {
-		errors.Wrap(err, errors.ErrCodeInternal, "LLM API is not configured")
-	}
-	summaryContent, err = s.getSummaryFromLLM(ctx, document.Content)
+	// Generate summary using LLM API
+	summaryContent, err := s.getSummaryFromLLM(ctx, document.Content)
 	if err != nil {
 		return nil, errors.Wrap(err, errors.ErrCodeInternal, "failed to get summary from LLM")
 	}
@@ -134,7 +130,7 @@ func (s *DocumentService) GenerateSummary(ctx context.Context, documentID uuid.U
 		return nil, errors.Wrap(err, errors.ErrCodeInternal, "failed to create summary")
 	}
 
-	// ドキュメントを処理済みとしてマーク
+	// Mark document as processed
 	document.MarkProcessed()
 	if err := s.docRepo.Update(ctx, document); err != nil {
 		return nil, errors.Wrap(err, errors.ErrCodeInternal, "failed to update document")
@@ -145,7 +141,7 @@ func (s *DocumentService) GenerateSummary(ctx context.Context, documentID uuid.U
 
 func (s *DocumentService) getSummaryFromLLM(ctx context.Context, content string) (string, error) {
 
-	prompt := fmt.Sprintf("Please summarize the following content in Japanses :\n\n%s", content)
+	prompt := fmt.Sprintf("Please summarize the following content in Japanese business style within 200 characters:\n\n%s", content)
 	log.Printf("LLM Request Prompt: %s", prompt)
 
 	resBody := LLMRequest{

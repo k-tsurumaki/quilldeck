@@ -13,19 +13,19 @@ import (
 func main() {
 	cfg := config.Load()
 	
-	// データベース接続
+	// Connect to database
 	db, err := sqlite.NewConnection(cfg.Database.Path)
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
 	defer db.Close()
 	
-	// データディレクトリ作成
+	// Create data directory
 	if err := os.MkdirAll("./data", 0755); err != nil {
 		log.Fatal("Failed to create data directory:", err)
 	}
 	
-	// マイグレーション実行
+	// Run database migrations
 	if err := db.RunMigrations(); err != nil {
 		log.Fatal("Failed to run migrations:", err)
 	}
