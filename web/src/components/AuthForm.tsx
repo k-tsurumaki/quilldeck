@@ -47,77 +47,82 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '0 auto', padding: '20px' }}>
-      <h2>{isLogin ? 'ログイン' : 'ユーザー登録'}</h2>
-      
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px' }}>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
-
-        {!isLogin && (
-          <div style={{ marginBottom: '15px' }}>
-            <label>Name:</label>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 p-4">
+      <div className="bg-white p-10 rounded-xl shadow-2xl w-full max-w-md">
+        <h2 className="text-4xl font-extrabold text-center text-gray-800 mb-8">QuillDeck</h2>
+        <p className="text-center text-gray-600 mb-8">
+          {isLogin ? 'アカウントにログイン' : '新しいアカウントを作成'}
+        </p>
+        
+        <form onSubmit={handleSubmit}>
+          <div className="mb-6">
+            <label className="block text-gray-700 text-sm font-bold mb-2">メールアドレス</label>
             <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
-              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+              className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+              placeholder="your@example.com"
             />
           </div>
-        )}
 
-        {error && (
-          <div style={{ color: 'red', marginBottom: '15px' }}>
-            {error}
+          <div className="mb-6">
+            <label className="block text-gray-700 text-sm font-bold mb-2">パスワード</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+              placeholder="••••••••"
+            />
           </div>
-        )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '10px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: loading ? 'not-allowed' : 'pointer'
-          }}
-        >
-          {loading ? '処理中...' : (isLogin ? 'ログイン' : '登録')}
-        </button>
-      </form>
+          {!isLogin && (
+            <div className="mb-6">
+              <label className="block text-gray-700 text-sm font-bold mb-2">名前</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                placeholder="あなたの名前"
+              />
+            </div>
+          )}
 
-      <p style={{ textAlign: 'center', marginTop: '20px' }}>
-        <button
-          type="button"
-          onClick={() => setIsLogin(!isLogin)}
-          style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer' }}
-        >
-          {isLogin ? 'アカウントを作成' : 'ログインに戻る'}
-        </button>
-      </p>
+          {error && (
+            <div className="mb-6 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-3 px-4 rounded-lg font-bold focus:outline-none focus:shadow-outline transition-colors duration-200 shadow-md ${
+              loading 
+                ? 'bg-gray-400 cursor-not-allowed text-white' 
+                : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+            }`}
+          >
+            {loading ? '処理中...' : (isLogin ? 'ログイン' : 'アカウント作成')}
+          </button>
+        </form>
+
+        <p className="text-center text-gray-600 text-sm mt-6">
+          {isLogin ? 'アカウントをお持ちでないですか？' : 'すでにアカウントをお持ちですか？'}
+          <button
+            type="button"
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-indigo-600 hover:underline font-semibold ml-1"
+          >
+            {isLogin ? '新規登録' : 'ログイン'}
+          </button>
+        </p>
+      </div>
     </div>
   );
 };
