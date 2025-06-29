@@ -7,6 +7,7 @@ import (
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
+	LLM      LLMConfig
 }
 
 type ServerConfig struct {
@@ -18,6 +19,12 @@ type DatabaseConfig struct {
 	Path string
 }
 
+type LLMConfig struct {
+	LLM_API_KEY  string
+	LLM_BASE_URL string
+	LLM_MODEL   string
+}
+
 func Load() *Config {
 	return &Config{
 		Server: ServerConfig{
@@ -26,6 +33,11 @@ func Load() *Config {
 		Database: DatabaseConfig{
 			Type: getEnv("DB_TYPE", "sqlite"),
 			Path: getEnv("DB_PATH", "./data/quilldeck.db"),
+		},
+		LLM: LLMConfig{
+			LLM_API_KEY:  getEnv("LLM_API_KEY", ""),
+			LLM_BASE_URL: getEnv("LLM_BASE_URL", ""),
+			LLM_MODEL: getEnv("LLM_BASE_URL", ""),
 		},
 	}
 }

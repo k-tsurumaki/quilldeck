@@ -1,24 +1,81 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
 	"strings"
+	"time"
 
 	"github/k-tsurumaki/quilldeck/internal/domain/models"
 	"github/k-tsurumaki/quilldeck/internal/domain/repository"
 	"github/k-tsurumaki/quilldeck/internal/pkg/errors"
+
 	"github.com/google/uuid"
 )
 
 type DocumentService struct {
 	docRepo     repository.DocumentRepository
 	summaryRepo repository.SummaryRepository
+	llmClinet   *LLMClient
 }
 
-func NewDocumentService(docRepo repository.DocumentRepository, summaryRepo repository.SummaryRepository) *DocumentService {
+type LLMClient struct {
+	apiKey  string
+	baseURL string
+	model   string
+	client  *http.Client
+}
+
+type LLMRequest struct {
+	Model    string    `json:"model"`
+	Messages []Message `json:"messages"`
+}
+
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type LLMResponse struct {
+	ID      string `json:"id"`
+	Model   string `json:"model"`
+	Object  string `json:"object"`
+	Created int64  `json:"created"`
+	Choices []struct {
+		Index        int     `json:"index"`
+		FinishReason string  `json:"finish_reason"`
+		Message      Message `json:"message"`
+	} `json:"choices"`
+	Usage struct {
+		PromptTokens     int `json:"prompt_tokens"`
+		CompletionTokens int `json:"completion_tokens"`
+		TotalTokens      int `json:"total_tokens"`
+	} `json:"usage"`
+}
+
+// NewLLMClient creates a new instance of LLMClient with configuration from the global Config.
+func NewLLMClient(apiKey, baseURL, model string) *LLMClient {
+	return &LLMClient{
+		apiKey:  apiKey,
+		baseURL: baseURL,
+		model:   model,
+		client: &http.Client{
+			Timeout: 30 * time.Second,
+		},
+	}
+}
+
+func NewDocumentService(docRepo repository.DocumentRepository, summaryRepo repository.SummaryRepository, llmAPIKey string, llmBaseURL string, llmModel string) *DocumentService {
+	llmClient := NewLLMClient(llmAPIKey, llmBaseURL, llmModel)
 	return &DocumentService{
 		docRepo:     docRepo,
 		summaryRepo: summaryRepo,
+		llmClinet:   llmClient,
 	}
 }
 
@@ -52,17 +109,26 @@ func (s *DocumentService) GetUserDocuments(ctx context.Context, userID uuid.UUID
 	return documents, nil
 }
 
-func (s *DocumentService) GenerateSummary(ctx context.Context, documentID uuid.UUID, length models.SummaryLength) (*models.Summary, error) {
+func (s *DocumentService) GenerateSummary(ctx context.Context, documentID uuid.UUID) (*models.Summary, error) {
 	document, err := s.docRepo.GetByID(ctx, documentID)
 	if err != nil {
 		return nil, errors.Wrap(err, errors.ErrCodeNotFound, "document not found")
 	}
 
-	// 簡単な要約生成（実際のAI連携は後で実装）
-	summaryContent := s.generateSimpleSummary(document.Content, length)
-	keywords := s.extractKeywords(document.Content)
-
-	summary := models.NewSummary(documentID, summaryContent, length, keywords)
+	// 要約生成（LLM APIが設定されていない場合はシンプル要約を使用）
+	var summaryContent string
+	if s.llmClinet.apiKey != "" && s.llmClinet.baseURL != "" {
+		var err error
+		summaryContent, err = s.getSummaryFromLLM(ctx, document.Content)
+		if err != nil {
+			// LLM APIエラーの場合はシンプル要約にフォールバック
+			summaryContent = s.generateSimpleSummary(document.Content)
+		}
+	} else {
+		// LLM APIが設定されていない場合はシンプル要約を使用
+		summaryContent = s.generateSimpleSummary(document.Content)
+	}		
+	summary := models.NewSummary(documentID, summaryContent)
 
 	if err := summary.Validate(); err != nil {
 		return nil, errors.Wrap(err, errors.ErrCodeValidation, "invalid summary data")
@@ -81,11 +147,66 @@ func (s *DocumentService) GenerateSummary(ctx context.Context, documentID uuid.U
 	return summary, nil
 }
 
-func (s *DocumentService) generateSimpleSummary(content string, length models.SummaryLength) string {
+func (s *DocumentService) getSummaryFromLLM(ctx context.Context, content string) (string, error) {
+
+	prompt := fmt.Sprintf("Please summarize the following content in Japanses :\n\n%s", content)
+	log.Printf("LLM Request Prompt: %s", prompt)
+
+	resBody := LLMRequest{
+		Model: s.llmClinet.model,
+		Messages: []Message{
+			{
+				Role:    "user",
+				Content: prompt,
+			},
+		},
+	}
+
+	jsonData, err := json.Marshal(resBody)
+	if err != nil {
+		return "", errors.Wrap(err, errors.ErrCodeInternal, "failed to marshal LLM request")
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", s.llmClinet.baseURL+"/chat/completions", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", errors.Wrap(err, errors.ErrCodeInternal, "failed to create LLM request")
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+s.llmClinet.apiKey)
+
+	resp, err := s.llmClinet.client.Do(req)
+	if err != nil {
+		return "", errors.Wrap(err, errors.ErrCodeInternal, "failed to call LLM API")
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", errors.Wrap(err, errors.ErrCodeInternal, "failed to read LLM response body")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("LLM API returned error: %s", string(bodyBytes))
+	}
+
+	var llmResponse LLMResponse
+	if err := json.Unmarshal(bodyBytes, &llmResponse); err != nil {
+		return "", errors.Wrap(err, errors.ErrCodeInternal, "failed to unmarshal LLM response")
+	}
+
+	if len(llmResponse.Choices) == 0 {
+		return "", fmt.Errorf("LLM API returned no choices in response")
+	}
+
+	return llmResponse.Choices[0].Message.Content, nil
+}
+
+func (s *DocumentService) generateSimpleSummary(content string) string {
 	// TODO: AI連携による実際の要約生成を実装
 	// 現在は入力の一文目を返すサンプル実装
 	content = strings.TrimSpace(content)
-	
+
 	// 日本語の句点で分割
 	if strings.Contains(content, "。") {
 		sentences := strings.Split(content, "。")
@@ -93,7 +214,7 @@ func (s *DocumentService) generateSimpleSummary(content string, length models.Su
 			return strings.TrimSpace(sentences[0]) + "。"
 		}
 	}
-	
+
 	// 英語のピリオドで分割（改行を除去してから処理）
 	if strings.Contains(content, ".") {
 		cleanContent := strings.ReplaceAll(content, "\n", " ")
@@ -102,36 +223,12 @@ func (s *DocumentService) generateSimpleSummary(content string, length models.Su
 			return strings.TrimSpace(sentences[0]) + "."
 		}
 	}
-	
+
 	// 改行で分割して最初の行を返す
 	lines := strings.Split(content, "\n")
 	if len(lines) > 0 && strings.TrimSpace(lines[0]) != "" {
 		return strings.TrimSpace(lines[0])
 	}
-	
+
 	return "No content to summarize."
-}
-
-func (s *DocumentService) extractKeywords(content string) []string {
-	words := strings.Fields(strings.ToLower(content))
-	keywordMap := make(map[string]int)
-
-	for _, word := range words {
-		if len(word) > 3 {
-			keywordMap[word]++
-		}
-	}
-
-	var keywords []string
-	for word, count := range keywordMap {
-		if count > 1 {
-			keywords = append(keywords, word)
-		}
-	}
-
-	if len(keywords) > 5 {
-		keywords = keywords[:5]
-	}
-
-	return keywords
 }

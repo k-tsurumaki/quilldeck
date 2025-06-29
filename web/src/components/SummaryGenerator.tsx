@@ -10,9 +10,7 @@ export const SummaryGenerator: React.FC<SummaryGeneratorProps> = ({
   documentId, 
   fileName 
 }) => {
-  const [length, setLength] = useState<'short' | 'medium' | 'long'>('short');
   const [summary, setSummary] = useState<string>('');
-  const [keywords, setKeywords] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
 
@@ -20,16 +18,14 @@ export const SummaryGenerator: React.FC<SummaryGeneratorProps> = ({
     setGenerating(true);
     setError('');
     setSummary('');
-    setKeywords([]);
 
     try {
-      const result = await api.generateSummary(documentId, length);
+      const result = await api.generateSummary(documentId);
       
       if (result.error) {
         setError(result.error);
       } else {
         setSummary(result.content);
-        setKeywords(result.keywords || []);
       }
     } catch (err) {
       setError('要約生成に失敗しました');
@@ -54,19 +50,6 @@ export const SummaryGenerator: React.FC<SummaryGeneratorProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-3">要約の長さ:</label>
-            <select 
-              value={length} 
-              onChange={(e) => setLength(e.target.value as 'short' | 'medium' | 'long')}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-            >
-              <option value="short">短く（1-2文）</option>
-              <option value="medium">中程度（3-5文）</option>
-              <option value="long">詳しく（段落形式）</option>
-            </select>
-          </div>
-
           <button
             onClick={handleGenerate}
             disabled={generating}
@@ -112,23 +95,7 @@ export const SummaryGenerator: React.FC<SummaryGeneratorProps> = ({
                 <p className="text-gray-800 leading-relaxed">{summary}</p>
               </div>
 
-              {keywords.length > 0 && (
-                <div>
-                  <h4 className="text-lg font-semibold mb-3 text-gray-700">キーワード</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {keywords.map((keyword, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium"
-                      >
-                        {keyword}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="mt-6 flex space-x-3">
+              <div className="flex space-x-3">
                 <button className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200">
                   コピー
                 </button>

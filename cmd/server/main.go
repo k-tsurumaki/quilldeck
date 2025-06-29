@@ -30,7 +30,7 @@ func main() {
 		log.Fatal("Failed to run migrations:", err)
 	}
 	
-	server := httpServer.NewServer(db)
+	server := httpServer.NewServer(db, cfg)
 	
 	fmt.Printf("Starting QuillDeck server on port %s...\n", cfg.Server.Port)
 	

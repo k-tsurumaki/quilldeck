@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"github/k-tsurumaki/quilldeck/internal/config"
 
 	"github.com/k-tsurumaki/fuselage"
 	"github/k-tsurumaki/quilldeck/internal/domain/service"
@@ -15,7 +16,7 @@ type Server struct {
 	docHandler  *handlers.DocumentHandler
 }
 
-func NewServer(db *sqlite.DB) *Server {
+func NewServer(db *sqlite.DB, cfg *config.Config) *Server {
 	router := fuselage.New()
 	
 	// リポジトリ作成
@@ -25,7 +26,7 @@ func NewServer(db *sqlite.DB) *Server {
 	
 	// サービス作成
 	authService := service.NewAuthService(userRepo)
-	docService := service.NewDocumentService(docRepo, summaryRepo)
+	docService := service.NewDocumentService(docRepo, summaryRepo, cfg.LLM.LLM_API_KEY, cfg.LLM.LLM_BASE_URL, cfg.LLM.LLM_MODEL)
 	
 	return &Server{
 		router:      router,

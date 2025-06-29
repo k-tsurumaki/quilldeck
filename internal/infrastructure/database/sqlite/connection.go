@@ -68,8 +68,6 @@ CREATE TABLE IF NOT EXISTS summaries (
 	id TEXT PRIMARY KEY,
 	document_id TEXT NOT NULL,
 	content TEXT NOT NULL,
-	length TEXT NOT NULL,
-	keywords TEXT,
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (document_id) REFERENCES documents(id)

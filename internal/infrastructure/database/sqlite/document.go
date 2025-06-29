@@ -3,7 +3,6 @@ package sqlite
 import (
 	"context"
 	"database/sql"
-	"strings"
 
 	"github/k-tsurumaki/quilldeck/internal/domain/models"
 	"github.com/google/uuid"
@@ -127,17 +126,14 @@ func NewSummaryRepository(db *DB) *SummaryRepository {
 }
 
 func (r *SummaryRepository) Create(ctx context.Context, summary *models.Summary) error {
-	keywords := strings.Join(summary.Keywords, ",")
 	query := `
-		INSERT INTO summaries (id, document_id, content, length, keywords, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?)`
+		INSERT INTO summaries (id, document_id, content, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?)`
 
 	_, err := r.db.ExecContext(ctx, query,
 		summary.ID.String(),
 		summary.DocumentID.String(),
 		summary.Content,
-		string(summary.Length),
-		keywords,
 		summary.CreatedAt,
 		summary.UpdatedAt,
 	)
@@ -145,16 +141,14 @@ func (r *SummaryRepository) Create(ctx context.Context, summary *models.Summary)
 }
 
 func (r *SummaryRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.Summary, error) {
-	query := `SELECT id, document_id, content, length, keywords, created_at, updated_at FROM summaries WHERE id = ?`
+	query := `SELECT id, document_id, content, created_at, updated_at FROM summaries WHERE id = ?`
 
 	var summary models.Summary
-	var idStr, docIDStr, lengthStr, keywordsStr string
+	var idStr, docIDStr string
 	err := r.db.QueryRowContext(ctx, query, id.String()).Scan(
 		&idStr,
 		&docIDStr,
 		&summary.Content,
-		&lengthStr,
-		&keywordsStr,
 		&summary.CreatedAt,
 		&summary.UpdatedAt,
 	)
@@ -168,15 +162,11 @@ func (r *SummaryRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.
 
 	summary.ID = uuid.MustParse(idStr)
 	summary.DocumentID = uuid.MustParse(docIDStr)
-	summary.Length = models.SummaryLength(lengthStr)
-	if keywordsStr != "" {
-		summary.Keywords = strings.Split(keywordsStr, ",")
-	}
 	return &summary, nil
 }
 
 func (r *SummaryRepository) GetByDocumentID(ctx context.Context, documentID uuid.UUID) ([]*models.Summary, error) {
-	query := `SELECT id, document_id, content, length, keywords, created_at, updated_at FROM summaries WHERE document_id = ?`
+	query := `SELECT id, document_id, content, created_at, updated_at FROM summaries WHERE document_id = ?`
 
 	rows, err := r.db.QueryContext(ctx, query, documentID.String())
 	if err != nil {
@@ -187,13 +177,11 @@ func (r *SummaryRepository) GetByDocumentID(ctx context.Context, documentID uuid
 	var summaries []*models.Summary
 	for rows.Next() {
 		var summary models.Summary
-		var idStr, docIDStr, lengthStr, keywordsStr string
+		var idStr, docIDStr string
 		err := rows.Scan(
 			&idStr,
 			&docIDStr,
 			&summary.Content,
-			&lengthStr,
-			&keywordsStr,
 			&summary.CreatedAt,
 			&summary.UpdatedAt,
 		)
@@ -203,10 +191,6 @@ func (r *SummaryRepository) GetByDocumentID(ctx context.Context, documentID uuid
 
 		summary.ID = uuid.MustParse(idStr)
 		summary.DocumentID = uuid.MustParse(docIDStr)
-		summary.Length = models.SummaryLength(lengthStr)
-		if keywordsStr != "" {
-			summary.Keywords = strings.Split(keywordsStr, ",")
-		}
 		summaries = append(summaries, &summary)
 	}
 
@@ -214,12 +198,10 @@ func (r *SummaryRepository) GetByDocumentID(ctx context.Context, documentID uuid
 }
 
 func (r *SummaryRepository) Update(ctx context.Context, summary *models.Summary) error {
-	keywords := strings.Join(summary.Keywords, ",")
-	query := `UPDATE summaries SET content = ?, keywords = ?, updated_at = ? WHERE id = ?`
+	query := `UPDATE summaries SET content = ?, updated_at = ? WHERE id = ?`
 
 	_, err := r.db.ExecContext(ctx, query,
 		summary.Content,
-		keywords,
 		summary.UpdatedAt,
 		summary.ID.String(),
 	)

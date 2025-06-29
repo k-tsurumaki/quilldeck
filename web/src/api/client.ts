@@ -17,7 +17,6 @@ export interface Document {
 export interface Summary {
   id: string;
   content: string;
-  keywords: string[];
 }
 
 export const api = {
@@ -68,11 +67,11 @@ export const api = {
     return response.json();
   },
 
-  generateSummary: async (documentId: string, length: 'short' | 'medium' | 'long') => {
+  generateSummary: async (documentId: string) => {
     const response = await fetch(`${API_BASE}/documents/summary`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ document_id: documentId, length }),
+      body: JSON.stringify({ document_id: documentId }),
     });
     return response.json();
   },

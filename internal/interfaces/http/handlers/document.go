@@ -25,16 +25,15 @@ type UploadResponse struct {
 }
 
 type SummaryRequest struct {
-	DocumentID string                `json:"document_id"`
-	Length     models.SummaryLength `json:"length"`
+	DocumentID string `json:"document_id"`
 }
 
 type SummaryResponse struct {
-	Message   string   `json:"message"`
-	SummaryID string   `json:"summary_id"`
-	Content   string   `json:"content"`
-	Keywords  []string `json:"keywords"`
+	Message   string `json:"message"`
+	SummaryID string `json:"summary_id"`
+	Content   string `json:"content"`
 }
+
 
 func (h *DocumentHandler) Upload(c *fuselage.Context) error {
 	// CORSヘッダーを設定
@@ -101,7 +100,7 @@ func (h *DocumentHandler) GenerateSummary(c *fuselage.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid document ID"})
 	}
 
-	summary, err := h.docService.GenerateSummary(c.Request.Context(), documentID, req.Length)
+	summary, err := h.docService.GenerateSummary(c.Request.Context(), documentID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
@@ -110,6 +109,5 @@ func (h *DocumentHandler) GenerateSummary(c *fuselage.Context) error {
 		Message:   "Summary generated successfully",
 		SummaryID: summary.ID.String(),
 		Content:   summary.Content,
-		Keywords:  summary.Keywords,
 	})
 }
