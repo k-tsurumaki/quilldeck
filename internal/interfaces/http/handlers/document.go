@@ -36,12 +36,7 @@ type SummaryResponse struct {
 
 
 func (h *DocumentHandler) Upload(c *fuselage.Context) error {
-	// CORSヘッダーを設定
-	c.Response.Header().Set("Access-Control-Allow-Origin", "*")
-	c.Response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	c.Response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-	
-	// TODO: 実際の認証実装後にユーザーIDを取得
+	// TODO: Get user ID from authentication after implementing auth
 	userID := uuid.New()
 
 	err := c.Request.ParseMultipartForm(10 << 20) // 10MB
@@ -55,7 +50,7 @@ func (h *DocumentHandler) Upload(c *fuselage.Context) error {
 	}
 	defer file.Close()
 
-	// ファイル拡張子チェック
+	// Check file extension
 	filename := header.Filename
 	var docType models.DocumentType
 	if strings.HasSuffix(strings.ToLower(filename), ".txt") {
@@ -66,13 +61,13 @@ func (h *DocumentHandler) Upload(c *fuselage.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Only .txt and .md files are supported"})
 	}
 
-	// ファイル内容読み取り
+	// Read file content
 	content, err := io.ReadAll(file)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to read file"})
 	}
 
-	// ドキュメント作成
+	// Create document
 	document, err := h.docService.UploadDocument(c.Request.Context(), userID, filename, string(content), docType)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
@@ -85,11 +80,6 @@ func (h *DocumentHandler) Upload(c *fuselage.Context) error {
 }
 
 func (h *DocumentHandler) GenerateSummary(c *fuselage.Context) error {
-	// CORSヘッダーを設定
-	c.Response.Header().Set("Access-Control-Allow-Origin", "*")
-	c.Response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	c.Response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-	
 	var req SummaryRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid JSON"})

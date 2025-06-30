@@ -1,139 +1,188 @@
-# QuillDeck
+<div align="center">
 
-[English](#english) | [日本語](#日本語)
+# 🪶 QuillDeck
 
----
+**AI-Powered Document Summarization Platform**
 
-## English
+[![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
+[![React](https://img.shields.io/badge/React-18+-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-### Overview
-QuillDeck is an AI-powered document summarization platform that helps users quickly extract key insights from their documents.
+[🇺🇸 English](#-english) • [🇯🇵 日本語](#-japanese)
 
-### Features
-- **Document Upload**: Support for TXT and MD files
-- **AI Summarization**: Automatic content summarization using LLM APIs
-- **User Management**: Secure authentication and user accounts
-- **Modern UI**: Clean, responsive web interface
-
-### Quick Start
-
-#### Prerequisites
-- Docker and Docker Compose
-- Git
-
-#### Installation
-```bash
-# Clone the repository
-git clone <repository-url>
-cd quilldeck
-
-# Copy environment configuration
-cp .env.example .env
-
-# Edit .env file with your settings
-# Set your LLM API keys and other configurations
-
-# Start the services
-docker compose up -d
-```
-
-#### Access
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8080
-
-### Architecture
-- **Frontend**: React with TypeScript and Tailwind CSS
-- **Backend**: Go with Echo framework
-- **Database**: SQLite (development) / PostgreSQL (production)
-- **AI Integration**: OpenRouter API support
-
-### API Endpoints
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/documents/upload` - Upload document
-- `POST /api/documents/summary` - Generate summary
-
-### Development
-```bash
-# Run tests
-go test ./...
-
-# Build backend
-go build ./cmd/server
-
-# Frontend development
-cd web
-npm install
-npm run dev
-```
-
-### Environment Variables
-See `.env.example` for all available configuration options.
+</div>
 
 ---
 
-## 日本語
+## 🇺🇸 English
 
-### 概要
-QuillDeckは、ユーザーがドキュメントから重要な洞察を素早く抽出できるAI搭載の文書要約プラットフォームです。
+### ✨ Overview
 
-### 機能
-- **ドキュメントアップロード**: TXTおよびMDファイルのサポート
-- **AI要約**: LLM APIを使用した自動コンテンツ要約
-- **ユーザー管理**: 安全な認証とユーザーアカウント
-- **モダンUI**: クリーンでレスポンシブなWebインターフェース
+QuillDeck transforms your documents into actionable insights using cutting-edge AI technology. Upload, analyze, and extract key information in seconds.
 
-### クイックスタート
+### 🚀 Features
 
-#### 前提条件
-- Docker と Docker Compose
-- Git
+<table>
+<tr>
+<td align="center">📄</td>
+<td><strong>Smart Upload</strong><br/>Support for TXT and MD files with drag & drop</td>
+</tr>
+<tr>
+<td align="center">🤖</td>
+<td><strong>AI Summarization</strong><br/>Powered by advanced LLM APIs for accurate summaries</td>
+</tr>
+<tr>
+<td align="center">🔐</td>
+<td><strong>Secure Auth</strong><br/>User management with encrypted authentication</td>
+</tr>
+<tr>
+<td align="center">🎨</td>
+<td><strong>Modern UI</strong><br/>Responsive design with multi-language support</td>
+</tr>
+</table>
 
-#### インストール
+### ⚡ Quick Start
+
 ```bash
-# リポジトリをクローン
+# 📥 Clone & Setup
 git clone <repository-url>
 cd quilldeck
-
-# 環境設定をコピー
 cp .env.example .env
 
-# .envファイルを編集して設定を行う
-# LLM APIキーやその他の設定を行ってください
+# 🔧 Configure your LLM API keys in .env
 
-# サービスを開始
+# 🚀 Launch
 docker compose up -d
 ```
 
-#### アクセス
-- フロントエンド: http://localhost:3000
-- バックエンドAPI: http://localhost:8080
+<div align="center">
 
-### アーキテクチャ
-- **フロントエンド**: React with TypeScript and Tailwind CSS
-- **バックエンド**: Go with Echo framework
-- **データベース**: SQLite (開発環境) / PostgreSQL (本番環境)
-- **AI統合**: OpenRouter API サポート
+**🌐 Access Points**
 
-### APIエンドポイント
-- `POST /api/auth/register` - ユーザー登録
-- `POST /api/auth/login` - ユーザーログイン
-- `POST /api/documents/upload` - ドキュメントアップロード
-- `POST /api/documents/summary` - 要約生成
+[Frontend →](http://localhost:3000) `localhost:3000` | [API →](http://localhost:8080) `localhost:8080`
 
-### 開発
+</div>
+
+### 🏗️ Tech Stack
+
+| Layer | Technology | Purpose |
+|-------|------------|----------|
+| **Frontend** | React + TypeScript + Tailwind | Modern, responsive UI |
+| **Backend** | Go + Fuselage | High-performance API |
+| **Database** | SQLite / PostgreSQL | Reliable data storage |
+| **AI** | OpenRouter API | Advanced summarization |
+
+### 📡 API Reference
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/auth/register` | `POST` | 👤 User registration |
+| `/api/auth/login` | `POST` | 🔑 User authentication |
+| `/api/documents/upload` | `POST` | 📤 Document upload |
+| `/api/documents/summary` | `POST` | 🤖 Generate summary |
+
+### 🛠️ Development
+
 ```bash
-# テスト実行
+# 🧪 Run tests
 go test ./...
 
-# バックエンドビルド
+# 🔨 Build backend
 go build ./cmd/server
 
-# フロントエンド開発
-cd web
-npm install
-npm run dev
+# 💻 Frontend dev
+cd web && npm install && npm run dev
 ```
 
-### 環境変数
-利用可能な設定オプションについては `.env.example` を参照してください。
+---
+
+## 🇯🇵 Japanese
+
+### ✨ 概要
+
+QuillDeckは最先端のAI技術を使用して、ドキュメントを実用的な洞察に変換します。アップロード、分析、重要な情報の抽出を数秒で実現。
+
+### 🚀 機能
+
+<table>
+<tr>
+<td align="center">📄</td>
+<td><strong>スマートアップロード</strong><br/>ドラッグ&ドロップ対応のTXT・MDファイルサポート</td>
+</tr>
+<tr>
+<td align="center">🤖</td>
+<td><strong>AI要約</strong><br/>高度なLLM APIによる正確な要約生成</td>
+</tr>
+<tr>
+<td align="center">🔐</td>
+<td><strong>セキュア認証</strong><br/>暗号化認証によるユーザー管理</td>
+</tr>
+<tr>
+<td align="center">🎨</td>
+<td><strong>モダンUI</strong><br/>多言語対応のレスポンシブデザイン</td>
+</tr>
+</table>
+
+### ⚡ クイックスタート
+
+```bash
+# 📥 クローン & セットアップ
+git clone <repository-url>
+cd quilldeck
+cp .env.example .env
+
+# 🔧 .envファイルでLLM APIキーを設定
+
+# 🚀 起動
+docker compose up -d
+```
+
+<div align="center">
+
+**🌐 アクセスポイント**
+
+[フロントエンド →](http://localhost:3000) `localhost:3000` | [API →](http://localhost:8080) `localhost:8080`
+
+</div>
+
+### 🏗️ 技術スタック
+
+| レイヤー | 技術 | 用途 |
+|----------|------|------|
+| **フロントエンド** | React + TypeScript + Tailwind | モダンでレスポンシブなUI |
+| **バックエンド** | Go + Fuselage | 高性能API |
+| **データベース** | SQLite / PostgreSQL | 信頼性の高いデータストレージ |
+| **AI** | OpenRouter API | 高度な要約機能 |
+
+### 📡 API リファレンス
+
+| エンドポイント | メソッド | 説明 |
+|----------------|----------|------|
+| `/api/auth/register` | `POST` | 👤 ユーザー登録 |
+| `/api/auth/login` | `POST` | 🔑 ユーザー認証 |
+| `/api/documents/upload` | `POST` | 📤 ドキュメントアップロード |
+| `/api/documents/summary` | `POST` | 🤖 要約生成 |
+
+### 🛠️ 開発
+
+```bash
+# 🧪 テスト実行
+go test ./...
+
+# 🔨 バックエンドビルド
+go build ./cmd/server
+
+# 💻 フロントエンド開発
+cd web && npm install && npm run dev
+```
+
+---
+
+<div align="center">
+
+**Made with ❤️ using Go & React**
+
+*Transform your documents into insights*
+
+</div>

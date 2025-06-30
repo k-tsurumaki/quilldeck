@@ -4,7 +4,8 @@ go 1.23.6
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/k-tsurumaki/fuselage v0.0.0-20250627131921-104f47b5e848
+	github.com/k-tsurumaki/fuselage v1.0.0
+	github.com/k-tsurumaki/fuselage/middleware v0.0.0-20250630061340-a13c3190dd13
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/stretchr/testify v1.8.4
 )

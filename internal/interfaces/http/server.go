@@ -5,6 +5,7 @@ import (
 	"github/k-tsurumaki/quilldeck/internal/config"
 
 	"github.com/k-tsurumaki/fuselage"
+	"github.com/k-tsurumaki/fuselage/middleware"
 	"github/k-tsurumaki/quilldeck/internal/domain/service"
 	"github/k-tsurumaki/quilldeck/internal/infrastructure/database/sqlite"
 	"github/k-tsurumaki/quilldeck/internal/interfaces/http/handlers"
@@ -19,12 +20,15 @@ type Server struct {
 func NewServer(db *sqlite.DB, cfg *config.Config) *Server {
 	router := fuselage.New()
 	
-	// リポジトリ作成
+	// Add CORS middleware
+	router.Use(middleware.CORS())
+	
+	// Create repositories
 	userRepo := sqlite.NewUserRepository(db)
 	docRepo := sqlite.NewDocumentRepository(db)
 	summaryRepo := sqlite.NewSummaryRepository(db)
 	
-	// サービス作成
+	// Create services
 	authService := service.NewAuthService(userRepo)
 	docService := service.NewDocumentService(docRepo, summaryRepo, cfg.LLM.LLM_API_KEY, cfg.LLM.LLM_BASE_URL, cfg.LLM.LLM_MODEL)
 	
@@ -36,14 +40,14 @@ func NewServer(db *sqlite.DB, cfg *config.Config) *Server {
 }
 
 func (s *Server) Start(port string) error {
-	// ヘルスチェック
+	// Health check endpoint
 	s.router.GET("/health", s.healthHandler)
 	
-	// 認証エンドポイント
+	// Authentication endpoints
 	s.router.POST("/api/auth/register", s.authHandler.Register)
 	s.router.POST("/api/auth/login", s.authHandler.Login)
 	
-	// ドキュメントエンドポイント
+	// Document endpoints
 	s.router.POST("/api/documents/upload", s.docHandler.Upload)
 	s.router.POST("/api/documents/summary", s.docHandler.GenerateSummary)
 
@@ -52,11 +56,6 @@ func (s *Server) Start(port string) error {
 }
 
 func (s *Server) healthHandler(c *fuselage.Context) error {
-	// CORSヘッダーを設定
-	c.Response.Header().Set("Access-Control-Allow-Origin", "*")
-	c.Response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	c.Response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-	
 	return c.JSON(http.StatusOK, map[string]string{
 		"status":  "ok",
 		"service": "quilldeck",
