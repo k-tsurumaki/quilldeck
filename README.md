@@ -19,7 +19,7 @@
 
 ### ✨ Overview
 
-QuillDeck transforms your documents into actionable insights using cutting-edge AI technology. Upload, analyze, and extract key information in seconds.
+**QuillDeck** combines the timeless art of writing (Quill) with modern presentation (Deck) - transforming your documents into actionable insights using cutting-edge AI technology. Upload, analyze, and extract key information in seconds.
 
 ### 🚀 Features
 
@@ -101,7 +101,7 @@ cd web && npm install && npm run dev
 
 ### ✨ 概要
 
-QuillDeckは最先端のAI技術を使用して、ドキュメントを実用的な洞察に変換します。アップロード、分析、重要な情報の抽出を数秒で実現。
+**QuillDeck**は伝統的な「書く」行為（Quill＝羽根ペン）と現代の「プレゼンテーション」（Deck＝スライドデッキ）を結びつけた造語です。最先端のAI技術でドキュメントを実用的な洞察に変換し、数秒で重要な情報を抽出します。
 
 ### 🚀 機能
 
